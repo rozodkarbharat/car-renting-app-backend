@@ -2,9 +2,9 @@ const userModel = require("../model/user.model");
 
 
 const IsUserExist=async(req,res,next)=>{
-    const username = req.body.username;
-    const logindata = await userModel.findOne({ username });
-
+    const email = req.body.email;
+    const logindata = await userModel.findOne({ email });
+    console.log(logindata,'uer exist')
     if (logindata) {
       res.send("user already exists");
     } 

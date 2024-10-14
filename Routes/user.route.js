@@ -13,7 +13,7 @@ userRouter.post("/signup", IsUserExist, (req, res) => {
             if (err) {
                 res.status(500).send({ message: "Please try again later" });
             }
-            const data = new userModel({ email, password: hash, name });
+            const data = new userModel({ email, password: hash, name, role:"user" });
             await data.save();
             res.status(200).send({ message: "User Registered Successsfully" });
         });
