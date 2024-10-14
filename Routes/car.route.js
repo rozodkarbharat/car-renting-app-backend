@@ -96,6 +96,25 @@ carRouter.post("/book-car", async function (req, res) {
     }
 })
 
+carRouter.get("/featured-cars", async function (req, res) {
+    try {
+        let data = await carDetailModel.aggregate([
+            {
+              $lookup: {
+                from: 'car_models',            // The collection to join with (use the actual collection name in the database)
+                localField: 'modelid',        // The field in carDetailModel that contains the model ID
+                foreignField: 'id',          // The field in car_model collection that matches the localField
+                as: 'carModels'               // The name of the field in which to store the joined data
+              }
+            }
+          ]);
+        res.status(200).send({ message: "",data, error:false }) 
+    }
+    catch (err) {
+        console.log(err,'error')
+        res.status(500).send({message:"Something went wrong",error:true})
+    }
+})
 
 module.exports = carRouter;
 
