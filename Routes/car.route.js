@@ -100,11 +100,7 @@ carRouter.post("/add-car", async (req, res) => {
             modelid,
             fueltype,
             charge } = req.body
-        console.log(id,
-            carnumber,
-            modelid,
-            fueltype,
-            charge, 'add car')
+  
         const data = new carDetailModel({
             id,
             carnumber,
@@ -124,15 +120,17 @@ carRouter.post("/add-car", async (req, res) => {
 carRouter.post("/book-car", async function (req, res) {
     try {
         const { carid,
-            bookingid,
+            modelid,
             starttime,
             endtime } = req.body
-
+            let bookingid = Date.now()
+        
         const data = new carBookingModel({
             carid,
             bookingid,
             starttime,
-            endtime
+            endtime,
+            modelid
         });
         await data.save()
         res.status(200).send({ message: "Car is added to database", error: false })
@@ -167,7 +165,6 @@ carRouter.get("/featured-cars", async function (req, res) {
 carRouter.get("/get-models", async function (req, res) {
     try {
         let data = await CarModel.find({})
-        console.log(data, 'all models')
         res.status(200).send({ message: "All cars models", data, error: false })
     }
     catch (err) {
