@@ -5,7 +5,8 @@ const carBookingSchema = mongoose.Schema({
   bookingid:String,
   starttime:Number,
   endtime:Number,
-  modelid:String
+  modelid:String,
+  userid:String,
 });
 
 const carBookingModel = mongoose.model("booking", carBookingSchema);

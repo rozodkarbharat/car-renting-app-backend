@@ -38,6 +38,7 @@ userRouter.post("/login", async (req, res) => {
                         token,
                         name: Data.name,
                         email,
+                        id:Data._id.toString()
                     });
                 } else {
                     res.status(200).send({ message: "Invalid credentials", type: "wraning" });

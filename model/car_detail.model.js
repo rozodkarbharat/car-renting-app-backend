@@ -6,6 +6,7 @@ const cardetailSchema = mongoose.Schema({
   modelid: String,
   fueltype: String,
   charge:Number,
+  image:String,
 
 });
 
