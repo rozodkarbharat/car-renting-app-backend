@@ -32,13 +32,14 @@ userRouter.post("/login", async (req, res) => {
         else {
             bcrypt.compare(password, Data.password, function (err, result) {
                 if (result) {
-                    var token = jwt.sign({ email }, "secret");
+                    var token = jwt.sign({ email, role:Data.role, userid:Data._id.toString()}, "secret");
                     res.send({
                         message: "login successful",
                         token,
                         name: Data.name,
                         email,
-                        id:Data._id.toString()
+                        id:Data._id.toString(),
+                        role:Data.role
                     });
                 } else {
                     res.status(200).send({ message: "Invalid credentials", type: "wraning" });

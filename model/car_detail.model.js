@@ -7,7 +7,8 @@ const cardetailSchema = mongoose.Schema({
   fueltype: String,
   charge:Number,
   image:String,
-
+  carid:String,
+  userid:String,
 });
 
 const carDetailModel = mongoose.model("cardetail", cardetailSchema);

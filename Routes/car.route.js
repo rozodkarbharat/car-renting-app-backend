@@ -124,10 +124,8 @@ carRouter.post("/add-car", upload.single("image"), async (req, res) => {
         let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
         const cldRes = await handleUpload(dataURI);
         let {
-            carnumber,
-            modelid,
-            fueltype,
-            charge, } = req.body
+            carnumber, modelid, fueltype, charge, carid, userid
+        } = req.body
         let id = Date.now()
 
 
@@ -138,6 +136,8 @@ carRouter.post("/add-car", upload.single("image"), async (req, res) => {
             modelid,
             fueltype,
             charge,
+            carid,
+            userid,
             image: cldRes.secure_url
         });
 

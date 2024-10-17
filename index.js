@@ -3,6 +3,8 @@ const app = express();
 var cors = require("cors");
 const userRouter = require("./Routes/user.route");
 const carRouter = require("./Routes/car.route");
+const adminRouter = require("./Routes/admin.route");
+
 
 const connection = require("./db");
 
@@ -12,7 +14,7 @@ app.use(cors());
 
 app.use("/user", userRouter);
 app.use("/car", carRouter);
-
+app.use("/admin", adminRouter);
 
 app.get("/", (req, res) => {
   res.send("Welcome to homepage");
