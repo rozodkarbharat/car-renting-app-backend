@@ -2,7 +2,6 @@ const express = require("express");
 const carBookingModel = require("../model/carbooking.model");
 const Authentication = require("../middleware/authenication");
 
-
 const userRouter = express.Router()
 
 userRouter.get('/', Authentication , async function (req, res) {
@@ -20,6 +19,5 @@ userRouter.get('/', Authentication , async function (req, res) {
         res.status(404).send({ message: "Something went wrong!", error: true });
     }
 })
-
 
 module.exports = userRouter
