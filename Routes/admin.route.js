@@ -1,11 +1,12 @@
 const express = require("express");
 var jwt = require("jsonwebtoken");
 const carDetailModel = require("../model/car_detail.model");
+const Authentication = require("../middleware/authenication");
 
 
 const adminRouter = express.Router();
 
-adminRouter.get("/my-cars", async (req, res) => {
+adminRouter.get("/my-cars", Authentication, async (req, res) => {
     try {
         const token = req.headers.authorization.split(" ")[1];
         const { userid } = jwt.verify(
@@ -36,7 +37,7 @@ adminRouter.get("/my-cars", async (req, res) => {
     }
 })
 
-adminRouter.post('/delete-car', async function (req, res) {
+adminRouter.post('/delete-car', Authentication, async function (req, res) {
     try{
         let {id} = req.body;
         let data = await carDetailModel.deleteOne({_id:id});

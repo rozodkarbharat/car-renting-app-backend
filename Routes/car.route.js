@@ -6,13 +6,14 @@ const CarModel = require("../model/cars_model.model");
 require("dotenv").config();
 const cloudinary = require("cloudinary").v2;
 const Multer = require("multer");
+const Authentication = require("../middleware/authenication");
 
 
 const carRouter = express.Router()
 
 
 
-carRouter.post('/add-car-model', async function (req, res) {
+carRouter.post('/add-car-model', Authentication , async function (req, res) {
     try {
         let { modelname, brandname, modelid } = req.body
         console.log(modelname, modelid, 'addmodel')
@@ -27,7 +28,7 @@ carRouter.post('/add-car-model', async function (req, res) {
 })
 
 
-carRouter.post("/get-available-cars-by-modelid", async (req, res) => {
+carRouter.post("/get-available-cars-by-modelid", Authentication, async (req, res) => {
     try {
         // Get starttime, endtime, and modelid from the request body
         let { starttime, endtime, modelid } = req.body;
@@ -115,7 +116,7 @@ const upload = Multer({
     storage,
 });
 
-carRouter.post("/add-car", upload.single("image"), async (req, res) => {
+carRouter.post("/add-car", Authentication, upload.single("image"), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).send({ message: "No file uploaded", error: true });
@@ -153,7 +154,7 @@ carRouter.post("/add-car", upload.single("image"), async (req, res) => {
 })
 
 
-carRouter.post("/book-car", async function (req, res) {
+carRouter.post("/book-car",Authentication, async function (req, res) {
     try {
         const { carid,
             modelid,
@@ -190,7 +191,7 @@ carRouter.get("/featured-cars", async function (req, res) {
                     as: 'carModels'
                 }
             }
-        ]);
+        ]).limit(12);
         res.status(200).send({ message: "", data, error: false })
     }
     catch (err) {
@@ -199,7 +200,7 @@ carRouter.get("/featured-cars", async function (req, res) {
     }
 })
 
-carRouter.get("/get-models", async function (req, res) {
+carRouter.get("/get-models", Authentication, async function (req, res) {
     try {
         let data = await CarModel.find({})
         res.status(200).send({ message: "All cars models", data, error: false })
@@ -209,6 +210,8 @@ carRouter.get("/get-models", async function (req, res) {
         res.status(500).send({ message: "Something went wrong", error: true })
     }
 })
+
+
 
 module.exports = carRouter;
 

@@ -4,25 +4,26 @@ const userModel = require("../model/user.model");
 
 const Authentication = (req, res, next) => {
   try {
-    const token = req.headers.token.split(" ")[1];
+    const token = req.headers.authorization.split(" ")[1];
     jwt.verify(token, "secret", async function (err, decoded) {
       if (err) {
-        res.send("Please login");
+        res.status(401).send({message:"Please login",error:true});
       } else {
         const logindata = await userModel.findOne({
-          username: decoded.username,
+          email: decoded.email,role: decoded.role
         });
 
         if (logindata) {
-          req.body.username = logindata.username;
+          req.body.email = logindata.email;
           next();
         } else {
-          res.status(401).send("Please login");
+          res.status(401).send({message:"Please login",error:true});
         }
       }
     });
   } catch (err) {
-    res.status(500).send("server error");
+    console.log(err,'error')
+    res.status(500).send({message:"server error", error:true});
   }
 };
 module.exports = Authentication;
