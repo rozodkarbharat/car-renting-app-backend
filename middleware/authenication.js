@@ -15,6 +15,7 @@ const Authentication = (req, res, next) => {
 
         if (logindata) {
           req.body.email = logindata.email;
+          req.body.userid = logindata?._id.toString();
           next();
         } else {
           res.status(401).send({message:"Please login",error:true});
