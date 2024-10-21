@@ -6,7 +6,8 @@ const IsUserExist=async(req,res,next)=>{
     const logindata = await userModel.findOne({ email });
 
     if (logindata) {
-      res.send({message:"User already exists",error:true});
+      res.status(400).send({message:"User already exists",error:true});
+  
     } 
     else {
       next();

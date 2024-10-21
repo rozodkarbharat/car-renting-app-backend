@@ -1,5 +1,4 @@
 const express = require("express");
-const app = express();
 var cors = require("cors");
 const carRouter = require("./Routes/car.route");
 const adminRouter = require("./Routes/admin.route");
@@ -7,6 +6,7 @@ const authRoute = require("./Routes/auth.route");
 const userRouter = require("./Routes/user.route");
 const connection = require("./db");
 
+const app = express();
 
 
 app.use(express.json());
@@ -31,3 +31,6 @@ app.listen(8000, async () => {
   console.log(err)
   }
 });
+
+
+module.exports = app;
