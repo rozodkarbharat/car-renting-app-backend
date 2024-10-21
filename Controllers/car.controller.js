@@ -23,7 +23,11 @@ async function handleUpload(file) {
 async function handleAddCarModel(req, res) {
     try {
         let { modelname, brandname, modelid } = req.body
-        console.log(modelname, modelid, 'addmodel')
+
+        if (!modelname || !brandname || !modelid) {
+            return res.status(400).send({ message: "All fields (modelname, brandname, modelid) are required", error: true });
+        }
+
         const data = new CarModel({ modelname: modelname, brandname: brandname, id: modelid });
         await data.save()
         res.status(200).send({ message: "Car model is added to database", error: false })
@@ -68,7 +72,7 @@ async function handleGetCarsByModelId(req, res) {
 }
 
 
-async function getAllAvailableCars (req, res){
+async function getAllAvailableCars(req, res) {
     try {
         // Get starttime, endtime, and modelid from the request body
         let { starttime, endtime, modelid } = req.body;
@@ -101,18 +105,28 @@ async function getAllAvailableCars (req, res){
     }
 }
 
-async function handleAddCar (req, res){
+async function handleAddCar(req, res) {
     try {
+        let {
+            carnumber, modelid, fueltype, charge, carid, userid
+        } = req.body
         if (!req.file) {
             return res.status(400).send({ message: "No file uploaded", error: true });
         }
+
+        if (!carnumber || !modelid || !fueltype || !charge || !carid || !userid) {
+            return res.status(400).send({ message: "All fields (carnumber, modelid, fueltype, charge, carid, userid) are required", error: true });
+        }
+
+        if (isNaN(charge)) {
+            return res.status(400).send({ message: "Charge must be numeric value", error: true });
+        }
+
         const b64 = Buffer.from(req.file.buffer).toString("base64");
         let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
         const cldRes = await handleUpload(dataURI);
 
-        let {
-            carnumber, modelid, fueltype, charge, carid, userid
-        } = req.body
+
 
         let id = Date.now()
 
@@ -137,12 +151,17 @@ async function handleAddCar (req, res){
     }
 }
 
-async function handleBookCar (req, res) {
+async function handleBookCar(req, res) {
     try {
         const { carid,
             modelid,
             starttime,
-            endtime, userId } = req.body
+            endtime, userid } = req.body
+
+        if (!carid || !modelid || !starttime || !endtime || !userid) {
+            return res.status(400).send({ message: "All fields (carid, modelid, starttime, endtime, userId) are required", error: true });
+        }
+
         let bookingid = Date.now()
 
         const data = new carBookingModel({
@@ -151,12 +170,10 @@ async function handleBookCar (req, res) {
             starttime,
             endtime,
             modelid,
-            userid: userId
+            userid: userid
         });
         await data.save()
         res.status(200).send({ message: "Car is added to database", error: false })
-
-
     }
     catch (err) {
         res.status(500).send({ message: "Something went wrong", error: true })
@@ -194,4 +211,4 @@ async function handleGetCarModels(req, res) {
     }
 }
 
-module.exports = {handleAddCar, handleGetCarsByModelId, getAllAvailableCars, handleAddCarModel, handleBookCar, handleGetFeaturedCars, handleGetCarModels}
+module.exports = { handleAddCar, handleGetCarsByModelId, getAllAvailableCars, handleAddCarModel, handleBookCar, handleGetFeaturedCars, handleGetCarModels }

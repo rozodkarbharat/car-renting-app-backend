@@ -27,7 +27,7 @@ carRouter.post("/get-all-available-cars", getAllAvailableCars);
 
 carRouter.post("/add-car",Authentication, upload.single("image"),handleAddCar)
 
-carRouter.post("/book-car", handleBookCar)
+carRouter.post("/book-car", Authentication , handleBookCar)
 
 carRouter.get("/featured-cars",handleGetFeaturedCars)
 
