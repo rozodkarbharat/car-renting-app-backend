@@ -1,53 +1,52 @@
 const bcrypt = require("bcrypt");
 var jwt = require("jsonwebtoken");
 const userModel = require("../model/user.model");
+const carBookingModel = require("../model/carbooking.model");
 
 
-function signupHandler(req, res) {
-    const { email, password, name } = req.body;
+async function getAllBookedCars(req, res) {
     try {
-        bcrypt.hash(password, 3, async function (err, hash) {
-            if (err) {
-                res.status(500).send({ message: "Please try again later", error:true });
+        let { userid } = req.body;
+
+        let bookedCars = await carBookingModel.aggregate([{ $match:  { userid: userid }} , {
+            $lookup: {
+                from: "car_models",
+                localField: "modelid",
+                foreignField: "id",
+                as: "carModels"
             }
-            const data = new userModel({ email, password: hash, name, role:"user" });
-            await data.save();
-            res.status(200).send({ message: "User Registered Successsfully", error: false });
-        });
-    } catch (err) {
-        res.status(500).send({ message: "Something went wrong", error:true });
+        },{
+            $lookup: {
+                from: "cardetails",
+                localField: "carid",
+                foreignField: "carid",
+                as: "carDetails"
+            }
+        }])
+         
+        res.status(200).json({ data: bookedCars, error: false });
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "An error occurred while retrieving booked cars", error: true });
     }
 }
 
-async function loginHandler(req, res)  {
+
+async function cancelBooking(req, res) {
     try {
-        var { email, password } = req.body;
-        const Data = await userModel.findOne({ email });
-        if (!Data) {
-            res.status(200).send({ message: "Invalid credentials", error:true })
-        }
-        else {
-            bcrypt.compare(password, Data.password, function (err, result) {
-                if (result) {
-                    var token = jwt.sign({ email, role:Data.role, userid:Data._id.toString()}, "secret");
-                    res.status(200).send({
-                        message: "login successful",
-                        token,
-                        name: Data.name,
-                        email,
-                        id:Data._id.toString(),
-                        role:Data.role,
-                        error:false
-                    });
-                } else {
-                    res.status(200).send({ message: "Invalid credentials",error:true });
-                }
-            });
-        }
-    } catch (err) {
-        res.status(500).send({ message: "server Error", error:true });
+        let { id } = req.body;
+        console.log(id,'id')
+        let deletedCar = await carBookingModel.deleteOne({ _id: id})
+         console.log(deletedCar)
+        res.status(200).json({ data: deletedCar, error: false });
+    }
+    catch (err) {
+        console.error(err,'error occurred while deleting booking');
+        res.status(500).json({ error: "An error occurred while cancelling booked cars", error: true });
     }
 }
 
 
-module.exports = { signupHandler, loginHandler}
+
+module.exports = { getAllBookedCars, cancelBooking}

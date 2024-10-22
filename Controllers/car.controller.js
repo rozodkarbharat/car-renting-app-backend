@@ -74,7 +74,6 @@ async function handleGetCarsByModelId(req, res) {
 
 async function getAllAvailableCars(req, res) {
     try {
-        // Get starttime, endtime, and modelid from the request body
         let { starttime, endtime, modelid } = req.body;
 
         if (!starttime || !endtime || !modelid) {
@@ -91,9 +90,9 @@ async function getAllAvailableCars(req, res) {
         let availableCars = await carDetailModel.aggregate([{ $match: { $and: [{ carid: { $nin: carIds } }, { modelid: modelid }] } }, {
             $lookup: {
                 from: "car_models",
-                localField: "modelid",
-                foreignField: "id",
-                as: "carModels"
+                localField: "carid",
+                foreignField: "carid",
+                as: "carDetail"
             }
         }])
 
