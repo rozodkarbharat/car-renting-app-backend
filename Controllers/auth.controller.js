@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 var jwt = require("jsonwebtoken");
 const userModel = require("../model/user.model");
+require('dotenv').config()
 
 
 function signupHandler(req, res) {
@@ -54,7 +55,7 @@ async function loginHandler(req, res) {
         else {
             bcrypt.compare(password, Data.password, function (err, result) {
                 if (result) {
-                    var token = jwt.sign({ email, role: Data.role, userid: Data._id.toString() }, "secret");
+                    var token = jwt.sign({ email, role: Data.role, userid: Data._id.toString() }, process.env.JWT_SECRET);
                     res.status(200).send({
                         message: "login successful",
                         token,

@@ -1,15 +1,16 @@
 const express = require("express");
 const Authentication = require("../middleware/authenication");
 const { handleGetMyCars, handleDeleteCar, handleUpdateCar } = require("../Controllers/admin.controller");
+const authorization = require("../middleware/authorization");
 
 
 const adminRouter = express.Router();
 
 
-adminRouter.get("/my-cars", Authentication, handleGetMyCars)
+adminRouter.get("/my-cars", authorization(['admin']), handleGetMyCars)
 
-adminRouter.post('/delete-car', Authentication, handleDeleteCar)
+adminRouter.post('/delete-car', authorization(['admin']), handleDeleteCar)
 
-adminRouter.post('/update-car', handleUpdateCar)
+adminRouter.post('/update-car', authorization(['admin']), handleUpdateCar)
 
 module.exports = adminRouter;

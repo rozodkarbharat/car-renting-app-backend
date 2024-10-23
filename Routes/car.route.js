@@ -8,6 +8,7 @@ const cloudinary = require("cloudinary").v2;
 const Multer = require("multer");
 const { handleAddCar, handleGetCarsByModelId, getAllAvailableCars, handleAddCarModel, handleBookCar, handleGetFeaturedCars, handleGetCarModels } = require("../Controllers/car.controller");
 const Authentication = require("../middleware/authenication");
+const authorization = require("../middleware/authorization");
 
 
 const carRouter = express.Router()
@@ -25,7 +26,7 @@ carRouter.post("/get-available-cars-by-modelid", handleGetCarsByModelId);
 
 carRouter.post("/get-all-available-cars", getAllAvailableCars);
 
-carRouter.post("/add-car",Authentication, upload.single("image"),handleAddCar)
+carRouter.post("/add-car",authorization(['admin']), upload.single("image"),handleAddCar)
 
 carRouter.post("/book-car", Authentication , handleBookCar)
 

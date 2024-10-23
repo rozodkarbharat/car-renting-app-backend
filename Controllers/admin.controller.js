@@ -8,7 +8,7 @@ async function handleGetMyCars (req, res) {
         const token = req.headers.authorization.split(" ")[1];
         const { userid } = jwt.verify(
             token,
-            "secret"
+            process.env.JWT_SECRET
         );
 
         let data = await carDetailModel.aggregate([
