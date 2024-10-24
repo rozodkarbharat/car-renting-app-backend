@@ -1,15 +1,11 @@
-var jwt = require("jsonwebtoken");
 const carDetailModel = require("../model/car_detail.model");
+const { handleUpload } = require("../utils/fileUpload.util");
 
 
 
 async function handleGetMyCars (req, res) {
     try {
-        const token = req.headers.authorization.split(" ")[1];
-        const { userid } = jwt.verify(
-            token,
-            process.env.JWT_SECRET
-        );
+        const { userid } = req
 
         let data = await carDetailModel.aggregate([
             {
@@ -75,5 +71,53 @@ async function handleUpdateCar(req, res) {
     }
 }
 
+async function handleAddCar(req, res) {
+    try {
+        let {
+            carnumber, modelid, fueltype, charge, carid
+        } = req.body
+        let userid = req?.userid
 
-module.exports = {handleGetMyCars, handleDeleteCar, handleUpdateCar};
+        if (!req.file) {
+            return res.status(400).send({ message: "No file uploaded", error: true });
+        }
+
+        if (!carnumber || !modelid || !fueltype || !charge || !carid || !userid) {
+            return res.status(400).send({ message: "All fields (carnumber, modelid, fueltype, charge, carid, userid) are required", error: true });
+        }
+
+        if (isNaN(charge)) {
+            return res.status(400).send({ message: "Charge must be numeric value", error: true });
+        }
+
+        const b64 = Buffer.from(req.file.buffer).toString("base64");
+        let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+        const cldRes = await handleUpload(dataURI);
+
+
+
+        let id = Date.now()
+
+        const data = new carDetailModel({
+            id,
+            carnumber,
+            modelid,
+            fueltype,
+            charge,
+            carid,
+            userid,
+            image: cldRes.secure_url
+        });
+
+        await data.save()
+        res.status(200).send({ message: "Car is added to database", error: false })
+
+    }
+    catch (err) {
+        console.log(err, "eror")
+        res.status(500).send({ message: "something went wrong", error: true })
+    }
+}
+
+
+module.exports = {handleGetMyCars, handleDeleteCar, handleUpdateCar, handleAddCar};

@@ -22,13 +22,13 @@ function authorization(roles = []) {
             });
 
             if (logindata) {
-                req.body.email = logindata.email;
-                req.body.userid = logindata?._id.toString();
+                req.userid = logindata?._id.toString();
                 next();
             } else {
                 return res.status(401).send({ message: "Invalid or expired token", error: true });
             }
         } catch (err) {
+            console.log(err,'error in authorization')
             return res.status(403).json({ message: "Invalid or expired token", error: true });
         }
     };

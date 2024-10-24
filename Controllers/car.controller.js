@@ -2,22 +2,7 @@ const carDetailModel = require("../model/car_detail.model");
 const carBookingModel = require("../model/carbooking.model");
 const CarModel = require("../model/cars_model.model");
 require("dotenv").config();
-const cloudinary = require("cloudinary").v2;
-const Multer = require("multer");
 
-
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-async function handleUpload(file) {
-    const res = await cloudinary.uploader.upload(file, {
-        resource_type: "auto",
-    });
-    return res;
-}
 
 
 async function handleAddCarModel(req, res) {
@@ -104,51 +89,6 @@ async function getAllAvailableCars(req, res) {
     }
 }
 
-async function handleAddCar(req, res) {
-    try {
-        let {
-            carnumber, modelid, fueltype, charge, carid, userid
-        } = req.body
-        if (!req.file) {
-            return res.status(400).send({ message: "No file uploaded", error: true });
-        }
-
-        if (!carnumber || !modelid || !fueltype || !charge || !carid || !userid) {
-            return res.status(400).send({ message: "All fields (carnumber, modelid, fueltype, charge, carid, userid) are required", error: true });
-        }
-
-        if (isNaN(charge)) {
-            return res.status(400).send({ message: "Charge must be numeric value", error: true });
-        }
-
-        const b64 = Buffer.from(req.file.buffer).toString("base64");
-        let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
-        const cldRes = await handleUpload(dataURI);
-
-
-
-        let id = Date.now()
-
-        const data = new carDetailModel({
-            id,
-            carnumber,
-            modelid,
-            fueltype,
-            charge,
-            carid,
-            userid,
-            image: cldRes.secure_url
-        });
-
-        await data.save()
-        res.status(200).send({ message: "Car is added to database", error: false })
-
-    }
-    catch (err) {
-        console.log(err, "eror")
-        res.status(500).send({ message: "something went wrong", error: true })
-    }
-}
 
 async function handleBookCar(req, res) {
     try {
@@ -210,4 +150,4 @@ async function handleGetCarModels(req, res) {
     }
 }
 
-module.exports = { handleAddCar, handleGetCarsByModelId, getAllAvailableCars, handleAddCarModel, handleBookCar, handleGetFeaturedCars, handleGetCarModels }
+module.exports = { handleGetCarsByModelId, getAllAvailableCars, handleAddCarModel, handleBookCar, handleGetFeaturedCars, handleGetCarModels }
