@@ -23,7 +23,6 @@ async function handleAddCarModel(req, res) {
     }
 }
 
-
 async function handleGetCarsByModelId(req, res) {
     try {
         let { starttime, endtime, modelid } = req.body;
@@ -55,40 +54,6 @@ async function handleGetCarsByModelId(req, res) {
         res.status(500).json({ error: "An error occurred while retrieving available cars", error: true });
     }
 }
-
-
-async function getAllAvailableCars(req, res) {
-    try {
-        let { starttime, endtime, modelid } = req.body;
-
-        if (!starttime || !endtime || !modelid) {
-            return res.status(400).json({ message: "Please provide starttime, endtime, and modelid", error: true });
-        }
-
-        let bookedCars = await carBookingModel.find({ $or: [{ starttime: { $gte: starttime, $lt: endtime } }, { endtime: { $lte: endtime, $gte: starttime } }, { $and: [{ starttime: { $gte: starttime } }, { endtime: { $lte: endtime } }] }], modelid: modelid })
-
-        let carIds = bookedCars.map((elem) => {
-            return elem.carid
-        })
-
-
-        let availableCars = await carDetailModel.aggregate([{ $match: { $and: [{ carid: { $nin: carIds } }, { modelid: modelid }] } }, {
-            $lookup: {
-                from: "car_models",
-                localField: "carid",
-                foreignField: "carid",
-                as: "carDetail"
-            }
-        }])
-
-        res.status(200).json({ data: availableCars, error: false });
-    }
-    catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "An error occurred while retrieving available cars", error: true });
-    }
-}
-
 
 async function handleBookCar(req, res) {
     try {
@@ -150,4 +115,4 @@ async function handleGetCarModels(req, res) {
     }
 }
 
-module.exports = { handleGetCarsByModelId, getAllAvailableCars, handleAddCarModel, handleBookCar, handleGetFeaturedCars, handleGetCarModels }
+module.exports = { handleGetCarsByModelId, handleAddCarModel, handleBookCar, handleGetFeaturedCars, handleGetCarModels }
