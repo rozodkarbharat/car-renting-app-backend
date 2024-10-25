@@ -4,7 +4,8 @@ require('dotenv').config()
 
 const Authentication = (req, res, next) => {
   try {
-    const token = req.headers.authorization.split(" ")[1];
+    const token = req.cookies.token
+
     jwt.verify(token, process.env.JWT_SECRET, async function (err, decoded) {
       if (err) {
         res.status(401).send({message:"Please login",error:true});
@@ -14,10 +15,10 @@ const Authentication = (req, res, next) => {
         });
 
         if (logindata) {
-          req.body.email = logindata.email;
-          req.body.userid = logindata?._id.toString();
+          req.userid = decoded.userid
           next();
-        } else {
+        } 
+        else {
           res.status(401).send({message:"Please login",error:true});
         }
       }

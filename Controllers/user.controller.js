@@ -6,8 +6,7 @@ const carBookingModel = require("../model/carbooking.model");
 
 async function getAllBookedCars(req, res) {
     try {
-        let { userid } = req.body;
-
+        let { userid } = req;
         let bookedCars = await carBookingModel.aggregate([{ $match:  { userid: userid }} , {
             $lookup: {
                 from: "car_models",
@@ -36,9 +35,9 @@ async function getAllBookedCars(req, res) {
 async function cancelBooking(req, res) {
     try {
         let { id } = req.body;
-        console.log(id,'id')
+
         let deletedCar = await carBookingModel.deleteOne({ _id: id})
-         console.log(deletedCar)
+        
         res.status(200).json({ data: deletedCar, error: false });
     }
     catch (err) {
