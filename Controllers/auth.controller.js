@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 var jwt = require("jsonwebtoken");
 const userModel = require("../model/user.model");
+const mailSender = require("../utils/mailSender");
 require('dotenv').config()
 
 
@@ -28,6 +29,8 @@ function signupHandler(req, res) {
             }
             const data = new userModel({ email, password: hash, name, role: "user" });
             await data.save();
+            let emailres = await mailSender({email,subject:"Signup success"})
+
             res.status(200).send({ message: "User Registered Successsfully", error: false });
         });
     } catch (err) {

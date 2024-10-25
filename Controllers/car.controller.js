@@ -2,6 +2,12 @@ const carDetailModel = require("../model/car_detail.model");
 const carBookingModel = require("../model/carbooking.model");
 const CarModel = require("../model/cars_model.model");
 require("dotenv").config();
+const NodeCache = require( "node-cache" );
+
+
+
+
+const myCache = new NodeCache();
 
 
 
@@ -87,17 +93,24 @@ async function handleBookCar(req, res) {
 
 async function handleGetFeaturedCars(req, res) {
     try {
-        let data = await carDetailModel.aggregate([
-            {
-                $lookup: {
-                    from: 'car_models',
-                    localField: 'modelid',
-                    foreignField: 'id',
-                    as: 'carModels'
+        value = myCache.get( "featuredcars" );
+        if(value){
+            return res.status(200).send({ message: "", data:value, error: false })
+        }
+        else{
+            let data = await carDetailModel.aggregate([
+                {
+                    $lookup: {
+                        from: 'car_models',
+                        localField: 'modelid',
+                        foreignField: 'id',
+                        as: 'carModels'
+                    }
                 }
-            }
-        ]);
-        res.status(200).send({ message: "", data, error: false })
+            ]);
+            myCache.set( "featuredcars", data )
+            return res.status(200).send({ message: "", data, error: false })
+        }
     }
     catch (err) {
         console.log(err, 'error')
