@@ -56,6 +56,12 @@ async function loginHandler(req, res) {
             bcrypt.compare(password, Data.password, function (err, result) {
                 if (result) {
                     var token = jwt.sign({ email, role: Data.role, userid: Data._id.toString() }, process.env.JWT_SECRET);
+                    const option = {
+                        httpOnly: true,
+                        secure: false,
+                    }
+                    res.cookie('token', token, option)
+
                     res.status(200).send({
                         message: "login successful",
                         token,
@@ -75,5 +81,35 @@ async function loginHandler(req, res) {
     }
 }
 
+async function validateToken(req, res) {
+    try {
+        let token = req.cookies.token
+        if (!token) {
+            return res.status(401).json({ message: "Access denied, no token provided", error: true });
+        }
 
-module.exports = { signupHandler, loginHandler }
+        jwt.verify(token, process.env.JWT_SECRET, async function (err, decoded) {
+            if (err) {
+                res.status(401).send({ message: "Please login", error: true });
+            } else {
+                const logindata = await userModel.findOne({
+                    email: decoded.email, role: decoded.role
+                });
+
+                if (logindata) {
+                    res.status(200).send({data:{role:decoded.role},error:false})
+                } else {
+                    res.status(401).send({ message: "Please login", error: true });
+                }
+            }
+        });
+
+
+
+    } catch (err) {
+        res.status(500).send({ message: "server Error", error: true });
+    }
+}
+
+
+module.exports = { signupHandler, loginHandler, validateToken }

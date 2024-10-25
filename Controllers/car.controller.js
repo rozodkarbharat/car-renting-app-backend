@@ -60,7 +60,8 @@ async function handleBookCar(req, res) {
         const { carid,
             modelid,
             starttime,
-            endtime, userid } = req.body
+            endtime } = req.body
+            let userid = req.userid
 
         if (!carid || !modelid || !starttime || !endtime || !userid) {
             return res.status(400).send({ message: "All fields (carid, modelid, starttime, endtime, userId) are required", error: true });
