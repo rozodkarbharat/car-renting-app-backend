@@ -27,10 +27,11 @@ function signupHandler(req, res) {
             if (err) {
                 res.status(500).send({ message: "Please try again later", error: true });
             }
-            const data = new userModel({ email, password: hash, name, role: "user" });
+            const data = new userModel({ email, password: hash, name, role: "user", isvalidemail: false });
             await data.save();
-            let emailres = await mailSender({email,subject:"Signup success"})
+            var token = jwt.sign({ email, role: "user", userid: data._id.toString() }, process.env.JWT_SECRET);
 
+            let emailres = await mailSender({email,subject:"Signup success", token})
             res.status(200).send({ message: "User Registered Successsfully", error: false });
         });
     } catch (err) {
@@ -53,7 +54,10 @@ async function loginHandler(req, res) {
 
         const Data = await userModel.findOne({ email });
         if (!Data) {
-            res.status(200).send({ message: "Invalid credentials", error: true })
+            res.status(401).send({ message: "Invalid credentials", error: true })
+        }
+        if(!Data.isvalidemail){
+            res.status(403).send({ message: "Email validation pending", error: true })
         }
         else {
             bcrypt.compare(password, Data.password, function (err, result) {
@@ -84,35 +88,88 @@ async function loginHandler(req, res) {
     }
 }
 
+async function signoutHandler(req, res) {
+    try {
+        res.clearCookie('token');
+        res.status(200).send({ message: "", error: false }); 
+       
+    } catch (err) {
+        res.status(500).send({ message: "server Error", error: true });
+    }
+}
+
 async function validateToken(req, res) {
     try {
         let token = req.cookies.token
         if (!token) {
-            return res.status(401).json({ message: "Access denied, no token provided", error: true });
+            return res.status(401).send({ message: "Access denied, no token provided", error: true });
         }
 
         jwt.verify(token, process.env.JWT_SECRET, async function (err, decoded) {
             if (err) {
-                res.status(401).send({ message: "Please login", error: true });
+              res.status(401).send({message:"Please login",error:true});
             } else {
-                const logindata = await userModel.findOne({
-                    email: decoded.email, role: decoded.role
-                });
+              const logindata = await userModel.findOne({
+                email: decoded.email,role: decoded.role
+              });
+              console.log(logindata,'token', token, decoded);
 
-                if (logindata) {
-                    res.status(200).send({data:{role:decoded.role},error:false})
-                } else {
-                    res.status(401).send({ message: "Please login", error: true });
+              if(logindata){
+                  const option = {
+                    httpOnly: true,
+                    secure: false,
                 }
+                res.cookie('token', token, option)
+                console.log(logindata,'logindata')
+                res.status(200).send({message:"Token verified successfully",data:logindata,error:false});
+              }
+              else{
+                res.status(401).send({ message: "Invalid token", error: true });
+              }
             }
-        });
-
-
+          });
 
     } catch (err) {
         res.status(500).send({ message: "server Error", error: true });
     }
 }
 
+async function verifyEmailHandler(req, res){
+    try{
+        let token = req.headers.token.split(" ")[1];
+        if (!token) {
+            return res.status(401).send({ message: "Access denied, no token provided", error: true });
+        }
 
-module.exports = { signupHandler, loginHandler, validateToken }
+        jwt.verify(token, process.env.JWT_SECRET, async function (err, decoded) {
+            if (err) {
+              res.status(401).send({message:"Please login",error:true});
+            } else {
+              const logindata = await userModel.findOneAndUpdate({
+                email: decoded.email,role: decoded.role
+              },{isvalidemail: true});
+
+              if(logindata){
+                  const option = {
+                    httpOnly: true,
+                    secure: false,
+                }
+                res.cookie('token', token, option)
+                res.status(200).send({message:"Token verified successfully",error:false});
+              }
+              else{
+                res.status(401).send({ message: "Invalid token", error: true });
+              }
+            }
+          });
+
+
+
+    }
+    catch (err) {
+
+    }
+}
+
+
+module.exports = { signupHandler, loginHandler, validateToken, verifyEmailHandler, signoutHandler }
