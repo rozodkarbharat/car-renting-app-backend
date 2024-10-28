@@ -90,6 +90,10 @@ async function handleAddCar(req, res) {
             return res.status(400).send({ message: "Charge must be numeric value", error: true });
         }
 
+        if (charge<50) {
+            return res.status(400).send({ message: "Per hour charge is very low", error: true });
+        }
+
         const b64 = Buffer.from(req.file.buffer).toString("base64");
         let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
         const cldRes = await handleUpload(dataURI);
