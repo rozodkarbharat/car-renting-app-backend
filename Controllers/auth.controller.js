@@ -18,6 +18,11 @@ function signupHandler(req, res) {
             return res.status(400).send({ message: "Invalid email format", error: true });
         }
 
+        let namRegex = /^[a-z\s]+$/i;
+        if (!namRegex.test(name)) {
+            return res.status(400).send({ message: "Invalid name", error: true });
+        }
+
         if (password.length < 6) {
             return res.status(400).send({ message: "Password must be at least 6 characters long", error: true });
         }
@@ -54,10 +59,10 @@ async function loginHandler(req, res) {
 
         const Data = await userModel.findOne({ email });
         if (!Data) {
-            res.status(401).send({ message: "Invalid credentials", error: true })
+            return res.status(401).send({ message: "Invalid credentials", error: true })
         }
         if(!Data.isvalidemail){
-            res.status(403).send({ message: "Email validation pending", error: true })
+            return res.status(403).send({ message: "Email validation pending", error: true })
         }
         else {
             bcrypt.compare(password, Data.password, function (err, result) {
@@ -69,17 +74,13 @@ async function loginHandler(req, res) {
                     }
                     res.cookie('token', token, option)
 
-                    res.status(200).send({
+                   return  res.status(200).send({
                         message: "login successful",
-                        token,
-                        name: Data.name,
-                        email,
-                        id: Data._id.toString(),
                         role: Data.role,
                         error: false
                     });
                 } else {
-                    res.status(200).send({ message: "Invalid credentials", error: true });
+                   return  res.status(200).send({ message: "Invalid credentials", error: true });
                 }
             });
         }
@@ -107,7 +108,7 @@ async function validateToken(req, res) {
 
         jwt.verify(token, process.env.JWT_SECRET, async function (err, decoded) {
             if (err) {
-              res.status(401).send({message:"Please login",error:true});
+              return res.status(401).send({message:"Please login",error:true});
             } else {
               const logindata = await userModel.findOne({
                 email: decoded.email,role: decoded.role
@@ -119,10 +120,10 @@ async function validateToken(req, res) {
                     secure: false,
                 }
                 res.cookie('token', token, option)
-                res.status(200).send({message:"Token verified successfully",data:logindata,error:false});
+                return res.status(200).send({message:"Token verified successfully",data:logindata,error:false});
               }
               else{
-                res.status(401).send({ message: "Invalid token", error: true });
+                return res.status(401).send({ message: "Invalid token", error: true });
               }
             }
           });
@@ -141,7 +142,7 @@ async function verifyEmailHandler(req, res){
 
         jwt.verify(token, process.env.JWT_SECRET, async function (err, decoded) {
             if (err) {
-              res.status(401).send({message:"Please login",error:true});
+             return res.status(401).send({message:"Please login",error:true});
             } else {
               const logindata = await userModel.findOneAndUpdate({
                 email: decoded.email,role: decoded.role
@@ -153,10 +154,10 @@ async function verifyEmailHandler(req, res){
                     secure: false,
                 }
                 res.cookie('token', token, option)
-                res.status(200).send({message:"Token verified successfully",error:false});
+               return  res.status(200).send({message:"Token verified successfully",error:false});
               }
               else{
-                res.status(401).send({ message: "Invalid token", error: true });
+               return res.status(401).send({ message: "Invalid token", error: true });
               }
             }
           });

@@ -8,7 +8,7 @@ const Authentication = (req, res, next) => {
 
     jwt.verify(token, process.env.JWT_SECRET, async function (err, decoded) {
       if (err) {
-        res.status(401).send({message:"Please login",error:true});
+        return res.status(401).send({message:"Please login",error:true});
       } else {
         const logindata = await userModel.findOne({
           email: decoded.email,role: decoded.role
@@ -19,7 +19,7 @@ const Authentication = (req, res, next) => {
           next();
         } 
         else {
-          res.status(401).send({message:"Please login",error:true});
+         return  res.status(401).send({message:"Please login",error:true});
         }
       }
     });

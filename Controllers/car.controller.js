@@ -37,6 +37,14 @@ async function handleGetCarsByModelId(req, res) {
             return res.status(400).json({ message: "Please provide starttime, endtime, and modelid", error: true });
         }
 
+        if(starttime>=endtime){
+            return res.status(400).send({message:"start time should be less than end time",error:true})
+        }
+
+        if((endtime-starttime)<3600){
+            return res.status(400).send({message:"cannot book for less than 1 hour",error:true})
+        }
+
         let bookedCars=[]
 
         if(modelid == "all"){
