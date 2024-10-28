@@ -25,14 +25,14 @@ function signupHandler(req, res) {
 
         bcrypt.hash(password, 3, async function (err, hash) {
             if (err) {
-                res.status(500).send({ message: "Please try again later", error: true });
+              return res.status(500).send({ message: "Please try again later", error: true });
             }
             const data = new userModel({ email, password: hash, name, role: "user", isvalidemail: false });
             await data.save();
             var token = jwt.sign({ email, role: "user", userid: data._id.toString() }, process.env.JWT_SECRET);
 
             let emailres = await mailSender({email,subject:"Signup success", token})
-            res.status(200).send({ message: "User Registered Successsfully", error: false });
+            return res.status(200).send({ message: "User Registered Successsfully", error: false });
         });
     } catch (err) {
         res.status(500).send({ message: "Something went wrong", error: true });
@@ -112,7 +112,6 @@ async function validateToken(req, res) {
               const logindata = await userModel.findOne({
                 email: decoded.email,role: decoded.role
               });
-              console.log(logindata,'token', token, decoded);
 
               if(logindata){
                   const option = {
@@ -120,7 +119,6 @@ async function validateToken(req, res) {
                     secure: false,
                 }
                 res.cookie('token', token, option)
-                console.log(logindata,'logindata')
                 res.status(200).send({message:"Token verified successfully",data:logindata,error:false});
               }
               else{

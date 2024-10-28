@@ -37,21 +37,47 @@ async function handleGetCarsByModelId(req, res) {
             return res.status(400).json({ message: "Please provide starttime, endtime, and modelid", error: true });
         }
 
-        let bookedCars = await carBookingModel.find({ $or: [{ starttime: { $gte: starttime, $lt: endtime } }, { endtime: { $lte: endtime, $gte: starttime } }, { $and: [{ starttime: { $gte: starttime } }, { endtime: { $lte: endtime } }] }], modelid: modelid })
+        let bookedCars=[]
+
+        if(modelid == "all"){
+            bookedCars = await carBookingModel.find({ $or: [{ starttime: { $gte: starttime, $lt: endtime } }, { endtime: { $lte: endtime, $gte: starttime } }, { $and: [{ starttime: { $gte: starttime } }, { endtime: { $lte: endtime } }] }]})
+        }
+        else{
+
+            bookedCars = await carBookingModel.find({ $or: [{ starttime: { $gte: starttime, $lt: endtime } }, { endtime: { $lte: endtime, $gte: starttime } }, { $and: [{ starttime: { $gte: starttime } }, { endtime: { $lte: endtime } }] }], modelid: modelid })
+        }
+
 
         let carIds = bookedCars.map((elem) => {
             return elem.carid
         })
 
+        let availableCars =[]
 
-        let availableCars = await carDetailModel.aggregate([{ $match: { $and: [{ carid: { $nin: carIds } }, { modelid: modelid }] } }, {
-            $lookup: {
-                from: "car_models",
-                localField: "modelid",
-                foreignField: "id",
-                as: "carModels"
-            }
-        }])
+        if (modelid == "all") {
+            availableCars = await carDetailModel.aggregate([{ $match: { $and: [{ carid: { $nin: carIds } }] } }, {
+
+                $lookup: {
+                    from: "car_models",
+                    localField: "modelid",
+                    foreignField: "id",
+                    as: "carModels"
+                }
+            }])
+        }
+        else {
+
+            availableCars = await carDetailModel.aggregate([{ $match: { $and: [{ carid: { $nin: carIds } }, { modelid: modelid }] } }, {
+
+                $lookup: {
+                    from: "car_models",
+                    localField: "modelid",
+                    foreignField: "id",
+                    as: "carModels"
+                }
+            }])
+        }
+
 
         res.status(200).json({ data: availableCars, error: false });
     }
@@ -106,6 +132,9 @@ async function handleGetFeaturedCars(req, res) {
                         foreignField: 'id',
                         as: 'carModels'
                     }
+                },
+                {
+                    $limit:12
                 }
             ]);
             myCache.set( "featuredcars", data )
